@@ -16,6 +16,8 @@ const SESSION_COOKIE = "__oktad_session_cookie"
 const CREDENTIALS_USERNAME = "__oktad_username"
 const CREDENTIALS_PASSWORD = "__oktad_password"
 
+var unknownMfaType = errors.New("unknown MFA type")
+
 func main() {
 	var opts struct {
 		ConfigFile          string `short:"c" long:"config" description:"Path to config file"`
@@ -289,7 +291,7 @@ func challengeMfa(ores *OktaLoginResponse, factor *OktaMfaFactor) (string, error
 
 	fmt.Println("Unsupported MFA type:", factor.FactorType)
 	fmt.Println("Supported types: TOTP and Okta Verify Push")
-	return "", errors.New("unknown MFA type")
+	return "", unknownMfaType
 }
 
 func challengePushMfa(ores *OktaLoginResponse, factor *OktaMfaFactor) (string, error) {
