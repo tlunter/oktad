@@ -1,5 +1,5 @@
-hash: feb42fbdcc75bc7948a5e34d5b381e7ad613190b38954b4da598b05046136b5d
-updated: 2017-01-30T13:53:21.17030985-08:00
+hash: a4ef3b322e080366b1f985ff48f7c3126a4e2ff070b674e959cae4cee23754de
+updated: 2019-06-22T09:01:14.531112-04:00
 imports:
 - name: github.com/andybalholm/cascadia
   version: 349dd0209470eabd9514242c688c403c0926d266
@@ -30,8 +30,6 @@ imports:
   - service/sts
 - name: github.com/go-ini/ini
   version: e3c2d47c61e5333f9aa2974695dd94396eb69c75
-- name: github.com/havoc-io/go-keytar
-  version: ebbe6b14d2cc43be32d2aeb3b2b7cba947eb0bec
 - name: github.com/jessevdk/go-flags
   version: 4e64e4a4e2552194cf594243e23aa9baf3b4297e
 - name: github.com/jmespath/go-jmespath
@@ -42,6 +40,8 @@ imports:
   version: 3cb3b8656883c2cc3deb9c643d93ea6e5157e425
 - name: github.com/visionmedia/go-debug
   version: bfacf9d8a444b50f5d7ae47727544e775486966f
+- name: github.com/zalando/go-keyring
+  version: 02404fc6afd131a45072cb85496797ec932a0212
 - name: golang.org/x/net
   version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
   subpackages:

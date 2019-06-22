@@ -11,7 +11,7 @@ import "encoding/base64"
 import "github.com/visionmedia/go-debug"
 import "github.com/PuerkitoBio/goquery"
 import (
-	"github.com/havoc-io/go-keytar"
+	"github.com/zalando/go-keyring"
 	"net/http"
 )
 
@@ -309,12 +309,6 @@ func processSamlResponse(res *http.Response) (*OktaSamlResponse, error) {
 		return &osres, err
 	}
 
-	keyStore, err := keytar.GetKeychain()
-
-	if err != nil {
-		debugOkta("error getting keychain access %s", err)
-	}
-
 	var sessionCookie *http.Cookie
 
 	for _, cookie := range res.Cookies() {
@@ -327,7 +321,7 @@ func processSamlResponse(res *http.Response) (*OktaSamlResponse, error) {
 		fmt.Println("Failed to write cookie to keystore")
 		debugOkta("error was %s", err)
 	}
-	keytar.ReplacePassword(keyStore, APPNAME, SESSION_COOKIE, encCookie)
+	keyring.Set(APPNAME, SESSION_COOKIE, encCookie)
 
 	return &osres, nil
 }

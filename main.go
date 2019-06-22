@@ -9,7 +9,7 @@ import "github.com/jessevdk/go-flags"
 import "github.com/visionmedia/go-debug"
 import "github.com/peterh/liner"
 import "github.com/aws/aws-sdk-go/aws/credentials"
-import "github.com/havoc-io/go-keytar"
+import "github.com/zalando/go-keyring"
 
 const VERSION = "0.8.0"
 const SESSION_COOKIE = "__oktad_session_cookie"
@@ -92,16 +92,9 @@ func main() {
 		debug("cred load err %s", err)
 	}
 
-	keystore, err := keytar.GetKeychain()
-	if err != nil {
-		fmt.Println("Failed to get keychain access")
-		debug("error was %s", err)
-		return
-	}
-
 	var sessionToken string
 	var saml *OktaSamlResponse
-	password, err := keystore.GetPassword(APPNAME, SESSION_COOKIE)
+	password, err := keyring.Get(APPNAME, SESSION_COOKIE)
 	if err != nil || password == "" {
 		sessionToken, err = getSessionFromLogin(&oktaCfg)
 		if err != nil {
