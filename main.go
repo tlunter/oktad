@@ -5,16 +5,20 @@ import "fmt"
 import "time"
 import "errors"
 import "net/http"
+import "os"
+import "os/exec"
 import "github.com/jessevdk/go-flags"
-import "github.com/tj/go-debug"
+import "github.com/visionmedia/go-debug"
 import "github.com/peterh/liner"
 import "github.com/aws/aws-sdk-go/aws/credentials"
-import "github.com/havoc-io/go-keytar"
+import "github.com/zalando/go-keyring"
 
 const VERSION = "0.8.0"
 const SESSION_COOKIE = "__oktad_session_cookie"
 const CREDENTIALS_USERNAME = "__oktad_username"
 const CREDENTIALS_PASSWORD = "__oktad_password"
+
+var unknownMfaType = errors.New("unknown MFA type")
 
 func main() {
 	var opts struct {
@@ -90,16 +94,9 @@ func main() {
 		debug("cred load err %s", err)
 	}
 
-	keystore, err := keytar.GetKeychain()
-	if err != nil {
-		fmt.Println("Failed to get keychain access")
-		debug("error was %s", err)
-		return
-	}
-
 	var sessionToken string
 	var saml *OktaSamlResponse
-	password, err := keystore.GetPassword(APPNAME, SESSION_COOKIE)
+	password, err := keyring.Get(APPNAME, SESSION_COOKIE)
 	if err != nil || password == "" {
 		sessionToken, err = getSessionFromLogin(&oktaCfg)
 		if err != nil {
@@ -176,7 +173,12 @@ func main() {
 	debug("Everything looks good; launching your program...")
 	err = prepAndLaunch(args, finalCreds)
 	if err != nil {
-		fmt.Println("Error launching program: ", err)
+		if exitError, ok := err.(*exec.ExitError); ok {
+			os.Exit(exitError.ExitCode())
+		} else {
+			fmt.Println("Error launching program: ", err)
+			os.Exit(1)
+		}
 	}
 }
 
@@ -266,7 +268,7 @@ func tryLogin(oktaCfg *OktaConfig, user string, pass string) (string, error) {
 		return "", errors.New("MFA required to use this tool")
 	}
 
-	factor, err := extractTokenFactor(ores)
+	factor, err := extractTokenFactor(oktaCfg, ores)
 
 	if err != nil {
 		fmt.Println("Error processing okta response!")
@@ -274,6 +276,50 @@ func tryLogin(oktaCfg *OktaConfig, user string, pass string) (string, error) {
 		return "", err
 	}
 
+	sessionToken, err := challengeMfa(ores, factor)
+	return sessionToken, err
+}
+
+func challengeMfa(ores *OktaLoginResponse, factor *OktaMfaFactor) (string, error) {
+	if factor.FactorType == "push" {
+		sessionToken, err := challengePushMfa(ores, factor)
+		return sessionToken, err
+	} else if factor.FactorType == "token:software:totp" {
+		sessionToken, err := challengeTotpMfa(ores, factor)
+		return sessionToken, err
+	}
+
+	fmt.Println("Unsupported MFA type:", factor.FactorType)
+	fmt.Println("Supported types: TOTP and Okta Verify Push")
+	return "", unknownMfaType
+}
+
+func challengePushMfa(ores *OktaLoginResponse, factor *OktaMfaFactor) (string, error) {
+	debug := debug.Debug("oktad:challengePushMfa")
+	tries := 0
+	var sessionToken string
+	var err error
+
+TRYMFA:
+	time.Sleep(250 * time.Millisecond)
+
+	if tries < 240 {
+		sessionToken, err = doMfa(ores, factor, "")
+		if err != nil {
+			tries++
+			goto TRYMFA // eat that, Djikstra!
+		}
+	} else {
+		fmt.Println("No response to push notification!")
+		debug("error from doMfa was %s", err)
+		return "", err
+	}
+
+	return sessionToken, nil
+}
+
+func challengeTotpMfa(ores *OktaLoginResponse, factor *OktaMfaFactor) (string, error) {
+	debug := debug.Debug("oktad:challengeTotpMfa")
 	tries := 0
 	var sessionToken string
 
