@@ -185,19 +185,14 @@ func main() {
 func getSessionFromLogin(oktaCfg *OktaConfig) (string, error) {
 	debug := debug.Debug("oktad:getSessionFromLogin")
 	var user, pass string
+	var err error
 
-	keystore, err := keytar.GetKeychain()
-	if err != nil {
-		debug("error was %s", err)
-		return "", errors.New("failed to get keychain access")
-	}
-
-	user, err = keystore.GetPassword(APPNAME, CREDENTIALS_USERNAME)
+	user, err = keyring.Get(APPNAME, CREDENTIALS_USERNAME)
 	if err != nil {
 		debug("error getting username from keychain: %s", err)
 	}
 
-	pass, err = keystore.GetPassword(APPNAME, CREDENTIALS_PASSWORD)
+	pass, err = keyring.Get(APPNAME, CREDENTIALS_PASSWORD)
 	if err != nil {
 		debug("error getting password from keychain: %s", err)
 	}
@@ -216,12 +211,12 @@ func getSessionFromLogin(oktaCfg *OktaConfig) (string, error) {
 		debug("stored okta credentials not found; will prompt for them")
 	}
 
-	err = keystore.DeletePassword(APPNAME, CREDENTIALS_USERNAME)
+	err = keyring.Delete(APPNAME, CREDENTIALS_USERNAME)
 	if err != nil {
 		debug("error deleting %s: %s", CREDENTIALS_USERNAME, err)
 	}
 
-	err = keystore.DeletePassword(APPNAME, CREDENTIALS_PASSWORD)
+	err = keyring.Delete(APPNAME, CREDENTIALS_PASSWORD)
 	if err != nil {
 		debug("error deleting %s: %s", CREDENTIALS_PASSWORD, err)
 	}
@@ -239,11 +234,11 @@ func getSessionFromLogin(oktaCfg *OktaConfig) (string, error) {
 
 	sessionToken, err := tryLogin(oktaCfg, user, pass)
 	if err == nil && sessionToken != "" {
-		keystore.AddPassword(APPNAME, CREDENTIALS_USERNAME, user)
+		keyring.Set(APPNAME, CREDENTIALS_USERNAME, user)
 		if err != nil {
 			debug("err storing username: %s", err)
 		}
-		keystore.AddPassword(APPNAME, CREDENTIALS_PASSWORD, pass)
+		keyring.Set(APPNAME, CREDENTIALS_PASSWORD, pass)
 		if err != nil {
 			debug("err storing password: %s", err)
 		}

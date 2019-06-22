@@ -4,7 +4,7 @@ import "os"
 import "fmt"
 import "errors"
 import "os/exec"
-import "github.com/tj/go-debug"
+import "github.com/visionmedia/go-debug"
 import "github.com/aws/aws-sdk-go/aws/credentials"
 
 var debugLaunch = debug.Debug("oktad:launch")
