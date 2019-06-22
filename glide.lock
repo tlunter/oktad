@@ -1,5 +1,5 @@
-hash: a4ef3b322e080366b1f985ff48f7c3126a4e2ff070b674e959cae4cee23754de
-updated: 2019-06-22T09:01:14.531112-04:00
+hash: 46d5b3354694833ae06b0fe904259c839ede82e2e0ec7f2a970b42031f3fd423
+updated: 2019-06-22T12:25:29.616456-04:00
 imports:
 - name: github.com/andybalholm/cascadia
   version: 349dd0209470eabd9514242c688c403c0926d266
@@ -28,8 +28,12 @@ imports:
   - private/protocol/rest
   - private/protocol/xml/xmlutil
   - service/sts
+- name: github.com/danieljoos/wincred
+  version: b892d337201d1400370ebf4fa919941c9ea222ee
 - name: github.com/go-ini/ini
   version: e3c2d47c61e5333f9aa2974695dd94396eb69c75
+- name: github.com/godbus/dbus
+  version: 2ff6f7ffd60f0f2410b3105864bdd12c7894f844
 - name: github.com/jessevdk/go-flags
   version: 4e64e4a4e2552194cf594243e23aa9baf3b4297e
 - name: github.com/jmespath/go-jmespath
@@ -42,6 +46,8 @@ imports:
   version: bfacf9d8a444b50f5d7ae47727544e775486966f
 - name: github.com/zalando/go-keyring
   version: 02404fc6afd131a45072cb85496797ec932a0212
+  subpackages:
+  - secret_service
 - name: golang.org/x/net
   version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
   subpackages:

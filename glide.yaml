@@ -1,9 +1,11 @@
 package: github.com/tlunter/oktad
 import:
-  - package: github.com/go-ini/ini
-  - package: github.com/visionmedia/go-debug
-  - package: github.com/jessevdk/go-flags
-  - package: github.com/peterh/liner
-  - package: github.com/PuerkitoBio/goquery
-  - package: github.com/aws/aws-sdk-go
-  - package: github.com/zalando/go-keyring
+- package: github.com/go-ini/ini
+- package: github.com/visionmedia/go-debug
+- package: github.com/jessevdk/go-flags
+- package: github.com/peterh/liner
+- package: github.com/PuerkitoBio/goquery
+- package: github.com/aws/aws-sdk-go
+- package: github.com/zalando/go-keyring
+- package: github.com/godbus/dbus
+  version: ^5.0.1
