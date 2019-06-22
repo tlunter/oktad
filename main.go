@@ -5,6 +5,8 @@ import "fmt"
 import "time"
 import "errors"
 import "net/http"
+import "os"
+import "os/exec"
 import "github.com/jessevdk/go-flags"
 import "github.com/visionmedia/go-debug"
 import "github.com/peterh/liner"
@@ -171,7 +173,12 @@ func main() {
 	debug("Everything looks good; launching your program...")
 	err = prepAndLaunch(args, finalCreds)
 	if err != nil {
-		fmt.Println("Error launching program: ", err)
+		if exitError, ok := err.(*exec.ExitError); ok {
+			os.Exit(exitError.ExitCode())
+		} else {
+			fmt.Println("Error launching program: ", err)
+			os.Exit(1)
+		}
 	}
 }
 
